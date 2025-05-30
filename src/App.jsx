@@ -7,7 +7,9 @@ import Login from './components/Login';
 import Signup from './components/Signup';
 import WorkerProfileForm from './components/WorkerProfileForm';
 import Navbar from './components/navbar';
-import WorkerProfilePage from './components/WorkerProfilePage';
+import MyProfile from './components/MyProfile';
+import EditProfile from './components/EditProfile';
+import WorkerProfile from './components/WorkerProfile';
 
 function PrivateRoute({ children }) {
   const [user, setUser] = useState(null);
@@ -32,7 +34,10 @@ export default function App() {
       <Routes>
         {/* Public Home with listing and auth links */}
         <Route path="/" element={<HomePage />} />
-        <Route path="/worker/:id" element={<WorkerProfilePage />} />
+        <Route path="/my-profile" element={<MyProfile />} />
+        <Route path="edit-profile" element={<EditProfile/>}/>
+        <Route path="/worker/:id" element={<WorkerProfile />} />
+
 
 
         {/* Authentication */}
@@ -41,7 +46,7 @@ export default function App() {
 
         {/* Protected routes */}
         <Route
-          path="/profile"
+          path="/profile-form"
           element={
             <PrivateRoute>
               <WorkerProfileForm />

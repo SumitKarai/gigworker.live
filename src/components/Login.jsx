@@ -1,40 +1,56 @@
-// src/components/Login.jsx
-import React, { useState } from 'react';
-import { auth, provider } from '../firebase';
-import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
-import { useNavigate } from 'react-router-dom';
+// Login.jsx
+import { useState } from "react";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { auth, db } from "../firebase";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleEmailLogin = async () => {
+  const handleLogin = async (e) => {
+    e.preventDefault();
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      navigate('/profile-form');
-    } catch (err) {
-      alert(err.message);
-    }
-  };
+      const userCred = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCred.user;
 
-  const handleGoogleLogin = async () => {
-    try {
-      await signInWithPopup(auth, provider);
-      navigate('/profile-form');
+      const userRef = doc(db, "workers", user.uid);
+      const docSnap = await getDoc(userRef);
+
+      if (!docSnap.exists()) {
+        // If no profile found, initialize it
+        await setDoc(userRef, {
+          area: "",
+          available: false,
+          bio: "",
+          city: "",
+          createdAt: serverTimestamp(),
+          isActive: false,
+          likes: 0,
+          name: "",
+          portfolio: "",
+          reviews: [],
+          skills: [],
+          services: [],
+          estimate: "",
+          whatsapp: ""
+        });
+      }
+
+      navigate("/profile");
     } catch (err) {
-      alert(err.message);
+      console.error("Login failed", err);
     }
   };
 
   return (
-    <div className="p-4 space-y-4 max-w-md mx-auto">
-      <h2 className="text-xl font-bold">Log In</h2>
-      <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className="w-full border p-2 rounded" />
-      <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" className="w-full border p-2 rounded" />
-      <button onClick={handleEmailLogin} className="w-full bg-blue-500 text-white p-2 rounded">Log In with Email</button>
-      <button onClick={handleGoogleLogin} className="w-full bg-red-500 text-white p-2 rounded">Continue with Google</button>
-    </div>
+    <form onSubmit={handleLogin}>
+      <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required />
+      <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" required />
+      <button type="submit">Login</button>
+    </form>
   );
 };
 

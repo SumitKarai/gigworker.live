@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { db } from "../firebase";
+import { db } from "../firebase"; // Ensure db is correctly initialized from firebase.js
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 const predefinedSkills = {
@@ -7,6 +7,11 @@ const predefinedSkills = {
   Plumber: ["Tap Fixing", "Leak Repair", "Bathroom Fitting"],
   Carpenter: ["Furniture Making", "Wood Polishing", "Door Fitting"]
 };
+
+const cities = [
+  "Delhi", "Mumbai", "Bangalore", "Kolkata", "Chennai",
+  "Hyderabad", "Ahmedabad", "Pune", "Jaipur", "Lucknow"
+];
 
 const WorkerProfileForm = () => {
   const [formData, setFormData] = useState({
@@ -19,11 +24,6 @@ const WorkerProfileForm = () => {
     available: false,
     portfolio: ""
   });
-
-  const cities = [
-    "Delhi", "Mumbai", "Bangalore", "Kolkata", "Chennai",
-    "Hyderabad", "Ahmedabad", "Pune", "Jaipur", "Lucknow"
-  ];
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -61,6 +61,7 @@ const WorkerProfileForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const payload = {
       ...formData,
       skills: formData.skills.map(({ skill, services }) => ({
@@ -69,13 +70,9 @@ const WorkerProfileForm = () => {
           .filter(s => s.selected)
           .map(s => ({ name: s.name, estimate: s.estimate }))
       })),
-      available: formData.available,
-      portfolio: formData.portfolio,
-      bio: formData.bio,
-      whatsapp: formData.whatsapp,
-      isActive: false, // default
+      isActive: false,
       likes: 0,
-      reviews: [], // optional initial placeholder for future reviews
+      reviews: [],
       createdAt: serverTimestamp()
     };
 
@@ -83,10 +80,20 @@ const WorkerProfileForm = () => {
       const docRef = await addDoc(collection(db, "workers"), payload);
       console.log("Profile created with ID:", docRef.id);
       alert("Profile created successfully!");
-      // Optionally reset form
+      // Optional: Reset form after submission
+      setFormData({
+        name: "",
+        area: "",
+        city: "",
+        skills: [{ skill: "", services: [] }],
+        bio: "",
+        whatsapp: "",
+        available: false,
+        portfolio: ""
+      });
     } catch (error) {
       console.error("Error adding profile:", error);
-      alert("Failed to save profile. Please try again.");
+      alert("Failed to save profile. Please check permissions or try again.");
     }
   };
 
@@ -199,6 +206,7 @@ const WorkerProfileForm = () => {
         placeholder="Portfolio Link (optional)"
         className="w-full p-2 border rounded"
       />
+
       <label className="flex items-center space-x-2">
         <input
           type="checkbox"

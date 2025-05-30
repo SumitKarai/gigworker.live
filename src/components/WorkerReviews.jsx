@@ -5,7 +5,7 @@ import { db } from "../firebase";
 
 const WorkerReviews = ({ workerId, reviews = [], onNewReview }) => {
   const [newReview, setNewReview] = useState("");
-  const hasReviewed = sessionStorage.getItem(`reviewed-${workerId}`);
+  const hasReviewed = sessionStorage.getItem(`reviewed-${workerId}`)  === "true";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
